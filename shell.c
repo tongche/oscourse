@@ -65,10 +65,15 @@ builtin_cd(int argc, char **argv)
 
 
 int
-builtin_status(int argc, char **argv)
+builtin_status(int argc, char **argv,int fd)
 {
-        printf("%d\n",error);
-	return (0);
+  char buffer[33];
+  int num = 0;
+  num = sprintf(buffer,"%d",error);
+  write(fd,buffer,num*sizeof(char));
+  if(fd==1)
+  putchar('\n');
+  return (0);
 }
 
 
@@ -79,12 +84,12 @@ run_command(command* com)
      if(!com->runnable)
          return 0;
  switch(com->commandType){
-   case CD: return builtin_cd(com->argc,com->argv);
-   case EXIT: 
+  case CD: return builtin_cd(com->argc,com->argv);
+  case EXIT: 
         isExiting = true;
         return 0;  
-   case STATUS: return builtin_status(com->argc,com->argv);
-   case EXTERNAL:
+  case STATUS: return builtin_status(com->argc,com->argv,com->inout[1]);
+  case EXTERNAL:
         pid = fork();
         if (pid == 0) {
            if(com->pipeToClose[0]>=0)
